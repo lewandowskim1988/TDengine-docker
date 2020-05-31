@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+    tdengine:
+        container_name: tdengine
+        build:
+            context: ./tdengine
+        image: lewandoskim/tdengine:latest
+        ports:
+            - 6020:6020
+        volumes:
+            - tdengine_data:/data
+
+    grafana:
+        container_name: grafana
+        image: lewandowskim/grafana:latest
+        ports:
+            - 3000:3000
+        depends_on:
+            - tdengine
+        volumes:
+            - grafana_etc:/etc/grafana
+            - grafana_lib:/var/lib/grafana
+            - grafana_plugins:/var/lib/grafana/plugins
+            - grafana_log:/var/log/grafana
+
+    client:
+        container_name: client
+        build:
+            context: ./telegraf
+        image: lewandowskim/telegraf:latest
+        volumes:
+            - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+        depends_on:
+            - tdengine
+            - grafana
+
+volumes:
+    grafana_etc:
+    grafana_lib:
+    grafana_plugins:
+    grafana_log:
+    tdengine_data:
